@@ -1,32 +1,50 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+// import { Card } from "@/components/ui/card";
 import MenueIcon from "@/assets/icons/NoticeNest-MenueButton.svg"
 import { useState } from "react";
+import { useEffect } from "react";
 
 
 const Home = () => {
 
 
+  const isDesktop = window.innerWidth >= 1024;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  useEffect(() => {
+    if (window.innerWidth >= 1024) {
+      setIsMenuOpen(true);
+    }
+  }, []);
 
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen flex overflow-hidden">
       {/* ─────────────── SIDE DRAWER ─────────────── */}
       <div
         className={`
-          fixed top-0 left-0 h-screen
-          bg-amber-200
-          transition-transform duration-300 ease-in-out
-          w-[70vw] md:w-[70vw] lg:w-[40vw]
-          ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}
-          z-40
-        `}
+    bg-amber-200 h-screen
+    transition-all duration-300 ease-in-out
+    fixed lg:static top-0 left-0 z-40
+    ${isDesktop && isMenuOpen ? "lg:w-[30vw]" : ""}
+    ${!isDesktop && isMenuOpen ? "w-[70vw]" : ""}
+    ${!isMenuOpen ? "w-0" : ""}
+    overflow-hidden
+  `}
       >
-        {/* Empty drawer for now */}
+        {/* Empty drawer */}
       </div>
-      <div className="min-h-screen w-full flex flex-col">
+
+
+      <div
+        className={`
+    flex flex-col min-h-screen
+    transition-all duration-300 ease-in-out
+    ${isDesktop && isMenuOpen ? "lg:w-[70vw]" : "w-full"}
+    ${!isDesktop && isMenuOpen ? "translate-x-[70vw]" : "translate-x-0"}
+  `}
+      >
+
 
         {/* ───────────────── TOP BAR (10vh) ───────────────── */}
         <div className="h-[10vh] w-full bg-red-300 flex items-center px-4 justify-between">
