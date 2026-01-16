@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import MenueIcon from "@/assets/icons/NoticeNest-MenueButton.svg"
 import { useState } from "react";
 import { useEffect } from "react";
-
+import NoticeTimeline from "@/components/NoticeTimeline";
+import NoticeTimeline01 from "@/components/NoticeTimeline01";
 
 const Home = () => {
-
 
   const isDesktop = window.innerWidth >= 1024;
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -19,18 +19,18 @@ const Home = () => {
 
 
   return (
-    <div className="relative min-h-screen flex overflow-hidden">
+    <div className="h-screen flex overflow-hidden">
       {/* ─────────────── SIDE DRAWER ─────────────── */}
       <div
         className={`
-    bg-amber-200 h-screen
-    transition-all duration-300 ease-in-out
-    fixed lg:static top-0 left-0 z-40
-    ${isDesktop && isMenuOpen ? "lg:w-[30vw]" : ""}
-    ${!isDesktop && isMenuOpen ? "w-[70vw]" : ""}
-    ${!isMenuOpen ? "w-0" : ""}
-    overflow-hidden
-  `}
+          bg-amber-200 h-screen
+          transition-all duration-300 ease-in-out
+          fixed lg:static top-0 left-0 z-40
+          ${isDesktop && isMenuOpen ? "lg:w-[30vw]" : ""}
+          ${!isDesktop && isMenuOpen ? "w-[70vw]" : ""}
+          ${!isMenuOpen ? "w-0" : ""}
+          overflow-hidden
+        `}
       >
         {/* Empty drawer */}
       </div>
@@ -38,11 +38,11 @@ const Home = () => {
 
       <div
         className={`
-    flex flex-col min-h-screen
-    transition-all duration-300 ease-in-out
-    ${isDesktop && isMenuOpen ? "lg:w-[70vw]" : "w-full"}
-    ${!isDesktop && isMenuOpen ? "translate-x-[70vw]" : "translate-x-0"}
-  `}
+          flex flex-col min-h-screen
+          transition-all duration-300 ease-in-out
+          ${isDesktop && isMenuOpen ? "lg:w-[70vw]" : "w-full"}
+          ${!isDesktop && isMenuOpen ? "translate-x-[70vw]" : "translate-x-0"}
+        `}
       >
 
 
@@ -90,20 +90,24 @@ const Home = () => {
         </div>
 
         {/* ───────────────── MAIN CONTENT AREA ───────────────── */}
-        <div className="flex-1 bg-green-300 relative">
+        <div className="flex-1 bg-green-300 relative overflow-y-auto">
+  
+  {/* FILTER POPUP */}
+  {isFilterOpen && (
+    <div className="absolute top-4 left-4 right-4 max-w-3xl mx-auto h-[30vh] bg-yellow-200 z-30 rounded-lg shadow-lg flex items-center justify-center">
+      Filter Section (empty)
+    </div>
+  )}
 
-          {/* FILTER POPUP */}
-          {isFilterOpen && (
-            <div className="absolute top-4 left-[10vw] w-[80vw] h-[30vh] bg-yellow-200 z-30 rounded-lg shadow-lg flex items-center justify-center">
-              Filter Section (empty)
-            </div>
-          )}
+  {/* TIMELINE */}
+  <NoticeTimeline01 />
 
-          {/* Floating Action Button */}
-          <Button className="h-12 w-12 rounded-full absolute bottom-6 right-6">
-            +
-          </Button>
-        </div>
+  {/* Floating Action Button */}
+  <Button className="h-12 w-12 rounded-full absolute bottom-6 right-6">
+    +
+  </Button>
+</div>
+
 
 
         {/* ───────────────── BOTTOM BAR (15vh) ───────────────── */}
