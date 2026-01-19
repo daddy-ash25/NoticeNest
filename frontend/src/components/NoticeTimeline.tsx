@@ -1,4 +1,16 @@
-import { useMemo } from "react";
+
+
+
+import { useMemo, useState, useRef, useEffect } from "react";
+
+
+
+
+type MonthKey = {
+    year: number;
+    month: number; // 0–11
+};
+
 
 /**
  * Utility: format date to YYYY-MM-DD
@@ -35,6 +47,47 @@ function generateDatesOfThisMonth(): Date[] {
 
     return dates;
 }
+
+function generateDatesForMonth(year: number, month: number): Date[] {
+    const dates: Date[] = [];
+    const lastDay = new Date(year, month + 1, 0).getDate();
+
+    for (let day = 1; day <= lastDay; day++) {
+        dates.push(new Date(year, month, day));
+    }
+
+    return dates;
+}
+
+
+function MonthView({ year, month, todayStr }: MonthKey & { todayStr: string }) {
+    const dates = generateDatesForMonth(year, month);
+    const weeks = groupDatesIntoWeeks(dates, todayStr);
+
+    return (
+        <div className="space-y-8">
+            <div className="text-sm text-muted-foreground">
+                {new Date(year, month).toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                })}
+            </div>
+
+            {weeks.map((week, i) => (
+                <div key={i} className="space-y-4">
+                    {week.isCurrentWeek && (
+                        <div className="border-t-2 border-red-500" />
+                    )}
+
+                    <div className="grid grid-cols-3 lg:grid-cols-7 gap-6">
+                        {week.days.map(CardMaker)}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 
 
 function groupDatesIntoWeeks(dates: Date[], todayStr: string) {
@@ -97,44 +150,113 @@ function CardMaker(date: Date) {
     );
 }
 
+/*setMonths(prev => {
+  const last = prev[prev.length - 1];
+  const nextMonth = last.month === 11
+    ? { year: last.year + 1, month: 0 }
+    : { year: last.year, month: last.month + 1 };
+
+  return [...prev, nextMonth];
+});
+
+
+setMonths(prev => {
+  const first = prev[0];
+  const prevMonth = first.month === 0
+    ? { year: first.year - 1, month: 11 }
+    : { year: first.year, month: first.month - 1 };
+
+  return [prevMonth, ...prev];
+});*/
+
+
 
 
 export default function NoticeTimeline() {
     const todayStr = formatDate(new Date());
 
-    const dates = useMemo(() => generateDatesOfThisMonth(), []);
-    const weeks = useMemo(() => groupDatesIntoWeeks(dates, todayStr), [dates, todayStr]);
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+
+    const [months, setMonths] = useState<MonthKey[]>([
+        { year: currentYear, month: currentMonth }
+    ]);
+
+    const topSentinel = useRef<HTMLDivElement | null>(null);
+    const bottomSentinel = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+
+                // 🔽 BOTTOM: load next month
+                if (entry.target === bottomSentinel.current) {
+                    setMonths(prev => {
+                        const last = prev[prev.length - 1];
+
+                        const nextMonth =
+                            last.month === 11
+                                ? { year: last.year + 1, month: 0 }
+                                : { year: last.year, month: last.month + 1 };
+
+                        const exists = prev.some(
+                            m => m.year === nextMonth.year && m.month === nextMonth.month
+                        );
+
+                        if (exists) return prev;
+                        return [...prev, nextMonth];
+                    });
+                }
+
+                // 🔼 TOP: load previous month
+                if (entry.target === topSentinel.current) {
+                    setMonths(prev => {
+                        const first = prev[0];
+
+                        const prevMonth =
+                            first.month === 0
+                                ? { year: first.year - 1, month: 11 }
+                                : { year: first.year, month: first.month - 1 };
+
+                        const exists = prev.some(
+                            m => m.year === prevMonth.year && m.month === prevMonth.month
+                        );
+
+                        if (exists) return prev;
+                        return [prevMonth, ...prev];
+                    });
+                }
+            });
+        });
+
+        if (topSentinel.current) observer.observe(topSentinel.current);
+        if (bottomSentinel.current) observer.observe(bottomSentinel.current);
+
+        return () => observer.disconnect();
+    }, []);
+
+
 
     return (
         <div className="px-4 py-6 space-y-8">
 
-            {/* Month header */}
-            <div className="text-sm text-muted-foreground">
-                {new Date().toLocaleDateString("en-US", {
-                    month: "long",
-                    year: "numeric",
-                })}
-            </div>
+            {/* Top sentinel */}
+            <div ref={topSentinel} className="h-[5vh]" />
 
-            {/* Weeks */}
-            {weeks.map((week, index) => (
-                <div key={index} className="space-y-4">
-
-                    {/* Red separator before current week */}
-                    {week.isCurrentWeek && (
-                        <div className="border-t-2 border-red-500" />
-                    )}
-
-                    {/* Week grid */}
-                    <div className="grid grid-cols-3 lg:grid-cols-7 gap-6">
-                        {week.days.map((date) => CardMaker(date))}
-                    </div>
-
-                </div>
+            {/* Months */}
+            {months.map(m => (
+                <MonthView
+                    key={`${m.year}-${m.month}`}
+                    year={m.year}
+                    month={m.month}
+                    todayStr={todayStr}
+                />
             ))}
 
-            {/* Infinite scroll placeholder */}
-            <div className="w-full h-[5vh] bg-blue-300 rounded-md" />
+            {/* Bottom sentinel */}
+            <div ref={bottomSentinel} className="h-[5vh]" />
         </div>
     );
 }
