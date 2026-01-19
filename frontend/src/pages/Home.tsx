@@ -4,7 +4,6 @@ import MenueIcon from "@/assets/icons/NoticeNest-MenueButton.svg"
 import { useState } from "react";
 import { useEffect } from "react";
 import NoticeTimeline from "@/components/NoticeTimeline";
-import NoticeTimeline01 from "@/components/NoticeTimeline01";
 
 const Home = () => {
 
@@ -91,22 +90,22 @@ const Home = () => {
 
         {/* ───────────────── MAIN CONTENT AREA ───────────────── */}
         <div className="flex-1 bg-green-300 relative overflow-y-auto">
-  
-  {/* FILTER POPUP */}
-  {isFilterOpen && (
-    <div className="absolute top-4 left-4 right-4 max-w-3xl mx-auto h-[30vh] bg-yellow-200 z-30 rounded-lg shadow-lg flex items-center justify-center">
-      Filter Section (empty)
-    </div>
-  )}
 
-  {/* TIMELINE */}
-  <NoticeTimeline01 />
+          {/* FILTER POPUP */}
+          {isFilterOpen && (
+            <div className="absolute top-4 left-4 right-4 max-w-3xl mx-auto h-[30vh] bg-yellow-200 z-30 rounded-lg shadow-lg flex items-center justify-center">
+              Filter Section (empty)
+            </div>
+          )}
 
-  {/* Floating Action Button */}
-  <Button className="h-12 w-12 rounded-full absolute bottom-6 right-6">
-    +
-  </Button>
-</div>
+          {/* TIMELINE */}
+          <NoticeTimeline />
+
+          {/* Floating Action Button */}
+          <Button className="h-12 w-12 rounded-full absolute bottom-6 right-6">
+            +
+          </Button>
+        </div>
 
 
 
