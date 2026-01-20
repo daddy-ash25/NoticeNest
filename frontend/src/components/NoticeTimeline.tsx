@@ -2,6 +2,8 @@
 
 
 import { useMemo, useState, useRef, useEffect } from "react";
+import { getNoticesForRange } from "@/services/noticeService";
+import type { Notice } from "@/types/notice";
 
 
 
@@ -30,23 +32,7 @@ function getWeekday(date: Date): string {
 /**
  * Utility: generate dates from today till end of current month
  */
-function generateDatesOfThisMonth(): Date[] {
-    const today = new Date();
-    const dates: Date[] = [];
 
-    const year = today.getFullYear();
-    const month = today.getMonth();
-
-    // last day of current month
-    const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
-
-    for (let day = 1; day <= lastDayOfMonth; day++) {
-        const d = new Date(year, month, day);
-        dates.push(d);
-    }
-
-    return dates;
-}
 
 function generateDatesForMonth(year: number, month: number): Date[] {
     const dates: Date[] = [];
@@ -64,6 +50,29 @@ function MonthView({ year, month, todayStr }: MonthKey & { todayStr: string }) {
     const dates = generateDatesForMonth(year, month);
     const weeks = groupDatesIntoWeeks(dates, todayStr);
 
+    const [notices, setNotices] = useState<Notice[]>([]);
+
+    useEffect(() => {
+        const startDate = formatDate(new Date(year, month, 1));
+        const endDate = formatDate(new Date(year, month + 1, 0));
+
+        getNoticesForRange(startDate, endDate).then(setNotices);
+    }, [year, month]);
+
+    const noticesByDate = useMemo(() => {
+        const map: Record<string, Notice[]> = {};
+
+        notices.forEach((notice) => {
+            if (!map[notice.date]) {
+                map[notice.date] = [];
+            }
+            map[notice.date].push(notice);
+        });
+
+        return map;
+    }, [notices]);
+
+
     return (
         <div className="space-y-8">
             <div className="text-sm text-muted-foreground">
@@ -80,7 +89,10 @@ function MonthView({ year, month, todayStr }: MonthKey & { todayStr: string }) {
                     )}
 
                     <div className="grid grid-cols-3 lg:grid-cols-7 gap-6">
-                        {week.days.map(CardMaker)}
+                        {week.days.map(date =>
+                            CardMaker(date, noticesByDate[formatDate(date)] || [])
+                        )}
+
                     </div>
                 </div>
             ))}
@@ -135,41 +147,49 @@ function groupDatesIntoWeeks(dates: Date[], todayStr: string) {
 
 
 
-function CardMaker(date: Date) {
-    return (
-        <div
-            key={formatDate(date)}
-            className="bg-white rounded-lg shadow-sm aspect-[1/1.6] p-4 flex flex-col"
-        >
-            <div className="text-sm font-medium">
-                {date.getDate()} — {getWeekday(date)}
-            </div>
+function CardMaker(date: Date, notices: Notice[]) {
+  const primaryNotice = notices[0]; // for now: show first notice
 
-            <div className="flex-1 mt-4 bg-gray-100 rounded-md" />
+  return (
+    <div
+      key={formatDate(date)}
+      className="bg-white rounded-lg shadow-sm aspect-[1/1.6] overflow-hidden flex flex-col"
+    >
+      {/* 🔹 TOP SECTION (40%) */}
+      <div className="h-[40%] p-3 bg-gray-50 flex flex-col justify-between">
+        {/* Date & weekday */}
+        <div className="flex justify-between text-xs font-medium text-gray-600">
+          <span>{date.getDate()}</span>
+          <span>{getWeekday(date)}</span>
         </div>
-    );
+
+        {/* Notice title */}
+        {primaryNotice && (
+          <div className="text-sm font-semibold mt-2 line-clamp-2">
+            {primaryNotice.title}
+          </div>
+        )}
+      </div>
+
+      {/* 🔹 BOTTOM SECTION (60%) */}
+      <div className="flex-1 p-3 flex flex-col gap-2">
+        {/* Time */}
+        {primaryNotice?.time && (
+          <div className="text-xs text-gray-500">
+            ⏰ {primaryNotice.time}
+          </div>
+        )}
+
+        {/* Description */}
+        {primaryNotice?.description && (
+          <div className="text-sm text-gray-700 line-clamp-4">
+            {primaryNotice.description}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
-
-/*setMonths(prev => {
-  const last = prev[prev.length - 1];
-  const nextMonth = last.month === 11
-    ? { year: last.year + 1, month: 0 }
-    : { year: last.year, month: last.month + 1 };
-
-  return [...prev, nextMonth];
-});
-
-
-setMonths(prev => {
-  const first = prev[0];
-  const prevMonth = first.month === 0
-    ? { year: first.year - 1, month: 11 }
-    : { year: first.year, month: first.month - 1 };
-
-  return [prevMonth, ...prev];
-});*/
-
-
 
 
 export default function NoticeTimeline() {
