@@ -43,4 +43,7 @@ export interface Notice {
   createdBy: string;
 
   color?: string; // Sticky-note color (future use)
+
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
 }

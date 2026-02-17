@@ -1,5 +1,3 @@
-// src/services/noticeService.ts
-
 import type { Notice } from "@/types/notice";
 import { mockNotices } from "@/data/mockNotices";
 
@@ -15,11 +13,34 @@ export async function getNoticesForRange(
   return new Promise((resolve) => {
     setTimeout(() => {
       const filtered = mockNotices.filter(
-        (notice) =>
-          notice.date >= startDate && notice.date <= endDate
+        (notice) => notice.date >= startDate && notice.date <= endDate
       );
-
       resolve(filtered);
-    }, 300); // simulate network delay
+    }, 300);
+  });
+}
+
+/**
+ * Create a new notice
+ * Phase-1: Pushes into mockNotices
+ * Phase-2: POST to backend
+ */
+export async function createNotice(
+  input: Omit<Notice, "id" | "createdAt" | "updatedAt">
+): Promise<Notice> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const now = new Date().toISOString();
+
+      const newNotice: Notice = {
+        ...input,
+        id: crypto.randomUUID(),
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      mockNotices.push(newNotice);
+      resolve(newNotice);
+    }, 300);
   });
 }
