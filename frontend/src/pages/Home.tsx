@@ -2,16 +2,34 @@
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import MenueIcon from "@/assets/icons/NoticeNest-MenueButton.svg";
+import { UserButton } from "@clerk/react";
+import { useClassApi } from "@/services/classApi";
 
 const Home: React.FC = () => {
   const isDesktop = window.innerWidth >= 1024;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const { addClassMember } = useClassApi();
+
+  const testAddMember = async () => {
+    try {
+      const result = await addClassMember(
+        "6ac538810dd73ef3f391a7bb",
+        "NNF9FCTYDU"
+      );
+
+      console.log("MEMBER ADDED:", result);
+    } catch (error) {
+      console.error("ADD MEMBER FAILED:", error);
+    }
+  };
 
   useEffect(() => {
     if (window.innerWidth >= 1024) {
       setIsMenuOpen(true);
     }
   }, []);
+
 
   return (
     <div className="h-screen flex overflow-hidden">
@@ -27,6 +45,12 @@ const Home: React.FC = () => {
           overflow-hidden
         `}
       >
+        <button
+          onClick={testAddMember}
+          className="fixed bottom-5 right-5 z-50 bg-black text-white px-4 py-2 rounded"
+        >
+          Test Add Member
+        </button>
         {/* Empty drawer for now */}
       </div>
 
@@ -39,7 +63,8 @@ const Home: React.FC = () => {
         `}
       >
         {/* ───────────────── TOP BAR (10vh) ───────────────── */}
-        <div className="h-[10vh] w-full bg-red-300 flex items-center px-4 justify-between">
+        <div className="h-[10vh] w-full bg-red-300 flex items-center px-4 relative">
+
           {/* Menu Icon */}
           <img
             src={MenueIcon}
@@ -49,9 +74,15 @@ const Home: React.FC = () => {
           />
 
           {/* Logo */}
-          <div className="text-3xl w-[55vw] text-center font-slackey tracking-wide">
+          <div className="absolute left-1/2 -translate-x-1/2 text-3xl font-slackey tracking-wide">
             NoticeNest
           </div>
+
+          {/* User Account */}
+          <div className="ml-auto">
+            <UserButton />
+          </div>
+
         </div>
 
         {/* CHILD ROUTE CONTENT */}
