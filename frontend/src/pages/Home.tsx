@@ -3,26 +3,11 @@ import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import MenueIcon from "@/assets/icons/NoticeNest-MenueButton.svg";
 import { UserButton } from "@clerk/react";
-import { useClassApi } from "@/services/classApi";
 
 const Home: React.FC = () => {
   const isDesktop = window.innerWidth >= 1024;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const { addClassMember } = useClassApi();
-
-  const testAddMember = async () => {
-    try {
-      const result = await addClassMember(
-        "6ac538810dd73ef3f391a7bb",
-        "NNF9FCTYDU"
-      );
-
-      console.log("MEMBER ADDED:", result);
-    } catch (error) {
-      console.error("ADD MEMBER FAILED:", error);
-    }
-  };
 
   useEffect(() => {
     if (window.innerWidth >= 1024) {
@@ -45,12 +30,6 @@ const Home: React.FC = () => {
           overflow-hidden
         `}
       >
-        <button
-          onClick={testAddMember}
-          className="fixed bottom-5 right-5 z-50 bg-black text-white px-4 py-2 rounded"
-        >
-          Test Add Member
-        </button>
         {/* Empty drawer for now */}
       </div>
 
